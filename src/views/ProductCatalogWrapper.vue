@@ -10,35 +10,7 @@
       <h1 class="products-title mb-5 font-normal color-text_colors-hero text-4xl">
         {{ primary_header }}
       </h1>
-      <div class="w-full max-w-lg mx-auto inline-flex">
-        <form
-          id="searchProductsForm"
-          @submit.prevent="searchProducts"
-          @reset.prevent="searchProducts"
-        >
-          <KInput
-            v-model="searchString"
-            class="k-input--full"
-            size="small"
-            type="search"
-            :placeholder="helpText.search"
-            data-testid="catalog-search"
-            form="searchProductsForm"
-            @input="searchProducts"
-          />
-          <KButton
-            form="searchProductsForm"
-            appearance="primary"
-            data-testid="catalog-search-button"
-            type="submit"
-            size="small"
-            :disabled="loading"
-            :is-rounded="false"
-          >
-            {{ searchString !== '' && loading ? helpText.searching : helpText.search }}
-          </KButton>
-        </form>
-      </div>
+
     </div>
     <Catalog
       :catalog-items="catalogItems"

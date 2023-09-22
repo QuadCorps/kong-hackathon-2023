@@ -13,6 +13,13 @@
       </router-link>
       <nav class="flex items-center links">
         <router-link
+          to="/search"
+          class="mr-2 p-2 search"
+        >
+          <div class="background-color-wrapper" />
+          AI Assistant
+        </router-link>
+        <router-link
           data-testid="catalog-link"
           :to="{ name: 'catalog' }"
           class="mr-2 p-2 catalog-link"

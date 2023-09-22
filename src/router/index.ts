@@ -14,6 +14,7 @@ import {
   shouldDeveloperAccessRoute,
   shouldRedirectToLogin
 } from '@/router/route-utils'
+import Search from "@/views/Search.vue";
 
 const ProductCatalogWrapper = () => import('../views/ProductCatalogWrapper.vue')
 const ProductShell = () => import('../views/ProductShell.vue')
@@ -35,6 +36,14 @@ export const portalRouter = () => {
         path: '/',
         component: Shell,
         children: [
+          {
+            path: '/search',
+            name: 'Search',
+            meta: {
+              title: "AI Assistant"
+            },
+            component: Search
+          },
           {
             path: '/login/:sso?',
             name: 'login',
