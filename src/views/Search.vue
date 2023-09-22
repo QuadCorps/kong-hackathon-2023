@@ -33,7 +33,6 @@
 </template>
 
 <script lang="ts">
-import AnswerSection from '@/components/AnswerSection.vue'
 import { defineComponent } from 'vue'
 import { OpenAIClient, AzureKeyCredential } from '@azure/openai';
 
@@ -45,7 +44,6 @@ const systemPrompt = import.meta.env.VITE_SYSTEM_PROMPT;
 export default defineComponent({
   name: 'Search',
   components: {
-    AnswerSection
   },
   data() {
     return {
