@@ -1,5 +1,5 @@
 <template>
-  <div class="container flex pb-0 product fixed-position">
+  <div>
     <EmptyState
       v-if="productError"
       is-error
@@ -7,15 +7,6 @@
       :message="productError"
     />
     <template v-else>
-      <div
-        class="sidebar-wrapper"
-      >
-        <Sidebar
-          class="sidebar"
-          :deselect-operation="deselectOperation"
-          @operation-selected="onOperationSelectedSidebar"
-        />
-      </div>
       <div class="content">
         <KAlert
           v-if="activeProductVersionDeprecated"
@@ -23,6 +14,19 @@
           :alert-message="deprecatedWarning"
           class="deprecated-warning"
         />
+        <KSelect
+          appearance="select"
+          class="version-select-dropdown"
+          width="100%"
+          data-testid="version-select-dropdown"
+          :enable-filtering="false"
+          :items="versionSelectItems"
+          @change="onChangeVersion"
+        >
+          <template #empty>
+            <div>{{ noResultsMessage }}</div>
+          </template>
+        </KSelect>
         <!-- pass product to child routes as a prop -->
         <router-view :product="product" />
       </div>
@@ -38,13 +42,45 @@ import getMessageFromError from '@/helpers/getMessageFromError'
 import usePortalApi from '@/hooks/usePortalApi'
 import { useI18nStore, useProductStore } from '@/stores'
 import type { ProductWithVersions } from '@/stores/product'
-import Sidebar from '@/components/product/Sidebar.vue'
 import useToaster from '@/composables/useToaster'
 import { DocumentContentTypeEnum, ListDocumentsTree } from '@kong/sdk-portal-js'
 import { fetchAll } from '@/helpers/fetchAll'
 import { Operation } from '@kong-ui-public/spec-renderer'
 import { AxiosResponse } from 'axios'
 import { sortByDate } from '@/helpers/sortBy'
+
+const emit = defineEmits(['operationSelected'])
+
+defineProps({
+  deselectOperation: {
+    type: Boolean,
+    default: false
+  }
+})
+
+const versionSelectItems = ref([])
+
+function updateVersionSelectItems () {
+  versionSelectItems.value = product.value?.versions
+    .slice() // clone before sorting
+    .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
+    .map((productVersion) => ({
+      value: productVersion.id,
+      label: `${productVersion.name}${productVersion.deprecated ? helpText.deprecated : ''}`,
+      selected: productVersion.id === activeProductVersionId.value
+    })) || []
+}
+
+function onChangeVersion (event) {
+  const version = product.value?.versions.find((productVersion) => productVersion.id === event.value)
+  if (!version) {
+    return
+  }
+
+  productStore.setActiveProductVersionId(version.id)
+}
+
+
 
 const { notify } = useToaster()
 const helpText = useI18nStore().state.helpText
@@ -55,6 +91,7 @@ const productError = ref(null)
 const activeProductVersionDeprecated = ref(false)
 const deselectOperation = ref<boolean>(false)
 
+const noResultsMessage = helpText.productVersion.unableToRetrieveDoc
 const deprecatedWarning = helpText.productVersion.deprecatedWarningProduct
 
 // @ts-ignore
@@ -90,16 +127,7 @@ async function fetchProduct () {
 
     productStore.setProduct(productWithVersion)
   } catch (err) {
-    productStore.setProduct(null)
-
     console.error(err)
-
-    if (err.response?.status === 404) {
-      router.push({
-        name: 'not-found'
-      })
-    }
-
     productError.value = getMessageFromError(err)
   }
 }
@@ -114,11 +142,9 @@ async function fetchDocumentTree () {
     }
     // @ts-ignore
     // overriding the axios response because we're specifying what we're accepting above
-    if (productStore.product) {
-      const res = await documentationApi.listProductDocuments(requestOptions) as AxiosResponse<ListDocumentsTree, any>
+    const res = await documentationApi.listProductDocuments(requestOptions) as AxiosResponse<ListDocumentsTree, any>
 
-      productStore.setDocumentTree((res.data).data)
-    }
+    productStore.setDocumentTree((res.data).data)
   } catch (err) {
     if (err.response.status === 404) {
       productStore.setDocumentTree([])
@@ -208,6 +234,7 @@ onMounted(async () => {
   await fetchProduct()
   await fetchDocumentTree()
   initActiveProductVersionId()
+  updateVersionSelectItems()
 })
 
 watch(() => productVersionParam.value, () => {
@@ -221,6 +248,13 @@ watch(() => productVersionParam.value, () => {
 // This ensures deselection of operations in the sidebar when the user navigates away from the spec page
 watch(() => route.name, () => {
   deselectOperation.value = route.name !== 'spec'
+})
+
+watch([
+  () => product.value,
+  () => activeProductVersionId.value
+], () => {
+  updateVersionSelectItems()
 })
 
 watch(() => activeProductVersionId.value, (newVal, oldVal) => {
@@ -253,40 +287,3 @@ watchEffect(() => {
   }
 })
 </script>
-
-<style scoped>
-.deprecated-warning.k-alert {
-  border-radius: 0;
-  position: sticky;
-  top: 0;
-  z-index: 1;
-}
-
-.container.product.page.fixed-position {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  max-width: 100%;
-}
-
-.product {
-  min-height: calc(100vh - var(--headerHeight));
-}
-
-.sidebar-wrapper {
-  flex: 0 0 auto;
-  border-right: 1px solid var(--section_colors-stroke);
-}
-
-.sidebar {
-  height: 100%;
-  overflow-y: auto;
-}
-
-.content {
-  flex: 1 1 auto;
-  overflow: auto;
-  position: relative;
-}
-</style>

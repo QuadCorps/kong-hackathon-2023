@@ -1,6 +1,6 @@
 <template>
   <div
-    :ref="specDetails"
+    :ref="api"
     class="spec mt-6 api-documentation"
   >
     <div class="container max-w-screen-2xl px-5 md:px-0">
@@ -34,33 +34,12 @@
         />
       </div>
     </div>
-
-    <SpecDetails
-      v-else-if="spec"
-      class="w-100"
-      :document="spec"
-      :has-sidebar="false"
-      :application-registration-enabled="applicationRegistrationEnabled"
-      :active-operation="sidebarActiveOperationListItem"
-      :current-version="currentVersion?.name"
-      @clicked-view-spec="triggerViewSpecModal"
-      @clicked-register="triggerViewSpecRegistrationModal"
+    <elements-api
+      :apiDescriptionDocument='spec'
+      router="hash"
+      layout="sidebar"
     />
 
-    <ViewSpecModal
-      :is-visible="viewSpecModalIsVisible"
-      :spec-contents="specContents"
-      :spec-name="specName"
-      :download-callback="downloadSpecContents"
-      @close="closeModal"
-    />
-    <ViewSpecRegistrationModal
-      :initial-selected-application="($route.query.application as string)"
-      :is-visible="viewSpecRegistrationModalIsVisible"
-      :product="product"
-      :version="currentVersion"
-      @close="closeModal"
-    />
   </div>
 </template>
 
@@ -78,7 +57,9 @@ import { useI18nStore, useAppStore, usePermissionsStore, useProductStore } from 
 import { OperationListItem, SpecDetails } from '@kong-ui-public/spec-renderer'
 import { idFromPathMethod } from '@/helpers/generatedOperationId'
 import '@kong-ui-public/spec-renderer/dist/style.css'
-import { ProductVersionSpecDocument } from '@kong/sdk-portal-js'
+import { ProductVersionSpec } from '@kong/sdk-portal-js'
+import "@stoplight/elements/web-components.min.js"
+import "@stoplight/elements/styles.min.css"
 
 export default defineComponent({
   name: 'Spec',
@@ -115,7 +96,7 @@ export default defineComponent({
     ]
 
     const applicationRegistrationEnabled = computed(() => {
-      return currentVersion.value.registration_configs?.length && isAllowedToRegister.value
+      return spec.value.statusCode !== 404 && currentVersion.value.registration_configs?.length && isAllowedToRegister.value
     })
 
     const helpText = useI18nStore().state.helpText
@@ -328,7 +309,7 @@ export default defineComponent({
         .then(async res => {
           // no content
           if (res.status === 204) {
-            res.data = {} as ProductVersionSpecDocument
+            res.data = {} as ProductVersionSpec
 
             return res
           }
@@ -476,53 +457,3 @@ export default defineComponent({
   }
 })
 </script>
-
-<style lang="scss">
-.spec {
-  .deprecated-alert {
-    padding: 14px;
-    font-family: inherit;
-    font-size: 1rem;
-    border-radius: 4px;
-    color: var(--KAlertWarningColor, var(--yellow-500, color(yellow-500)));
-    border-color: var(--KAlertWarningBorder, var(--yellow-200, color(yellow-200)));
-    background-color: var(--KAlertWarningBackground, var(--yellow-100, color(yellow-100)));
-  }
-
-  .container .breadcrumbs {
-    position: relative;
-    left: var(--spacing-xs)
-  }
-
-  .swagger-ui .version-pragma {
-    display: none;
-  }
-
-  .header-anchor {
-    position: relative;
-
-    svg {
-      position: absolute;
-      left: -1.5rem;
-      bottom: 0;
-    }
-  }
-}
-
-.spec-loading-container {
-  align-items: center;
-  background-color: var(--white, #fff);
-  display: flex;
-  height: 100%;
-  justify-content: center;
-  left: 0;
-  position: absolute;
-  top: 0;
-  width: 100%;
-  z-index: 10000;
-}
-
-.spec.api-documentation .breadcrumbs {
-  margin-left: 0;
-}
-</style>
