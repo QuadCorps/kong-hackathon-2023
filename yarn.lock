@@ -1009,7 +1009,15 @@
     axios "^1.4.0"
     swrv "^1.0.4"
 
-"@kong-ui-public/analytics-utilities@0.7.1", "@kong-ui-public/analytics-utilities@^0.7.1":
+"@kong-ui-public/analytics-utilities@0.10.5":
+  version "0.10.5"
+  resolved "https://registry.yarnpkg.com/@kong-ui-public/analytics-utilities/-/analytics-utilities-0.10.5.tgz#dc256ba674456cd464c9b91a722737b0bf6a2559"
+  integrity sha512-wM8Pvj/Xhj0kiZcMBnuEM5sWNY6Csxm41ogQRfNAfNpx9nTDnpvM90aUvQL83Q6ZXc93i1SA+sAdhYRI/jKadw==
+  dependencies:
+    date-fns "^2.30.0"
+    date-fns-tz "^2.0.0"
+
+"@kong-ui-public/analytics-utilities@^0.7.1":
   version "0.7.1"
   resolved "https://registry.yarnpkg.com/@kong-ui-public/analytics-utilities/-/analytics-utilities-0.7.1.tgz#c351396b85244a9d6445348d5f58da3c25e2d20c"
   integrity sha512-XYdRAdyvai+yAQuRiJgosJIzYXtFfwTfx+8Ew0zdr1hnAwkaLiFB6mH8KQWSDjjOIqD5FqxN3CiNcrIVkZU8yQ==
