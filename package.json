@@ -26,7 +26,7 @@
   },
   "dependencies": {
     "@azure/openai": "^1.0.0-beta.6",
-    "@kong-ui-public/analytics-chart": "0.8.31",
+    "@kong-ui-public/analytics-chart": "0.17.4",
     "@kong-ui-public/analytics-metric-provider": "1.1.22",
     "@kong-ui-public/analytics-utilities": "0.7.1",
     "@kong-ui-public/copy-uuid": "1.1.5",
